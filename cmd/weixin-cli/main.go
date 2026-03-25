@@ -11,8 +11,8 @@ import (
 	"syscall"
 	"time"
 
-	weixinsdk "github.com/openclaw/weixin-sdk-go"
-	"github.com/openclaw/weixin-sdk-go/pkg/api"
+	weixinsdk "github.com/1ncludeSteven/weixin-sdk-go"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/api"
 )
 
 func main() {

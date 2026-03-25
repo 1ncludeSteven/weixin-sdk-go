@@ -1,4 +1,4 @@
-module github.com/openclaw/weixin-sdk-go
+module github.com/1ncludeSteven/weixin-sdk-go
 
 go 1.22
 

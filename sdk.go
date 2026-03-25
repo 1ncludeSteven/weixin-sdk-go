@@ -9,14 +9,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/openclaw/weixin-sdk-go/pkg/api"
-	"github.com/openclaw/weixin-sdk-go/pkg/auth"
-	"github.com/openclaw/weixin-sdk-go/pkg/cdn"
-	"github.com/openclaw/weixin-sdk-go/pkg/config"
-	"github.com/openclaw/weixin-sdk-go/pkg/media"
-	"github.com/openclaw/weixin-sdk-go/pkg/messaging"
-	"github.com/openclaw/weixin-sdk-go/pkg/monitor"
-	"github.com/openclaw/weixin-sdk-go/pkg/storage"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/api"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/auth"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/cdn"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/config"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/media"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/messaging"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/monitor"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/storage"
 )
 
 // Version is the SDK version (matches npm package version).

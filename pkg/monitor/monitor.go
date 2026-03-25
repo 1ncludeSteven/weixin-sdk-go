@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/openclaw/weixin-sdk-go/pkg/api"
-	"github.com/openclaw/weixin-sdk-go/pkg/storage"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/api"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/storage"
 )
 
 const (

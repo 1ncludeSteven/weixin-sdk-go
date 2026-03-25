@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/openclaw/weixin-sdk-go/pkg/api"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/api"
 )
 
 const (

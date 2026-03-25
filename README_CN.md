@@ -4,29 +4,29 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/1ncludeSteven/weixin-sdk-go)](https://goreportcard.com/report/github.com/1ncludeSteven/weixin-sdk-go)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[中文文档](./README_CN.md)
+[English](./README.md)
 
-A complete Go implementation of the WeChat OpenClaw plugin (`@tencent-weixin/openclaw-weixin`), providing full feature parity with the official npm package.
+微信官方 OpenClaw 插件 (`@tencent-weixin/openclaw-weixin`) 的 Go 语言完整实现，提供与官方 npm 包完全一致的功能。
 
-## Features
+## 功能特性
 
-- ✅ **QR Code Login** - Complete QR code authentication flow
-- ✅ **Messaging** - Send/receive text, images, videos, files, voice messages
-- ✅ **Long Polling Monitor** - Real-time message reception
-- ✅ **Context Management** - Context token persistence
-- ✅ **CDN Encryption** - AES-128-ECB encrypted upload/download
-- ✅ **Multi-Account** - Multiple account support
-- ✅ **Pairing Authorization** - AllowFrom whitelist support
+- ✅ **二维码扫码登录** - 完整的 QR 码登录流程
+- ✅ **消息收发** - 文本、图片、视频、文件、语音
+- ✅ **长轮询监控** - 实时接收消息
+- ✅ **上下文管理** - Context Token 持久化
+- ✅ **CDN 加密传输** - AES-128-ECB 加密上传下载
+- ✅ **多账号支持** - 同时管理多个微信账号
+- ✅ **Pairing 授权** - AllowFrom 白名单
 
-## Installation
+## 安装
 
 ```bash
 go get github.com/1ncludeSteven/weixin-sdk-go
 ```
 
-## Quick Start
+## 快速开始
 
-### 1. QR Code Login
+### 1. 扫码登录
 
 ```go
 package main
@@ -41,24 +41,24 @@ func main() {
     sdk := weixinsdk.New(nil)
     ctx := context.Background()
 
-    // Start login
+    // 开始登录
     result, start, err := sdk.Login(ctx, "", false)
     if err != nil {
         panic(err)
     }
 
-    // Print QR code URL
+    // 打印二维码链接
     if start != nil && start.QRCodeURL != "" {
-        fmt.Println("Scan QR code:", start.QRCodeURL)
+        fmt.Println("请扫描二维码:", start.QRCodeURL)
     }
 
     if result.Connected {
-        fmt.Printf("Login successful! Account ID: %s\n", result.AccountID)
+        fmt.Printf("登录成功！账号ID: %s\n", result.AccountID)
     }
 }
 ```
 
-### 2. Receive Messages
+### 2. 接收消息
 
 ```go
 package main
@@ -74,18 +74,18 @@ func main() {
     sdk := weixinsdk.New(nil)
     accountID := "your-account-id"
 
-    // Create message handler
+    // 创建消息处理器
     handler := func(ctx context.Context, msg *api.WeixinMessage, accID string) error {
-        fmt.Printf("Received message: from=%s\n", msg.FromUserID)
+        fmt.Printf("收到消息: from=%s\n", msg.FromUserID)
         
-        // Extract text
+        // 提取文本
         for _, item := range msg.ItemList {
             if item.Type == int(api.MessageItemTypeText) {
-                fmt.Printf("Content: %s\n", item.TextItem.Text)
+                fmt.Printf("内容: %s\n", item.TextItem.Text)
             }
         }
         
-        // Save context token
+        // 保存 context token
         if msg.ContextToken != "" {
             sdk.SetContextToken(accID, msg.FromUserID, msg.ContextToken)
         }
@@ -93,13 +93,13 @@ func main() {
         return nil
     }
 
-    // Start monitor
+    // 启动监控
     monitor, _ := sdk.NewMonitor(accountID, weixinsdk.WithHandler(handler))
     monitor.Start(context.Background())
 }
 ```
 
-### 3. Send Messages
+### 3. 发送消息
 
 ```go
 package main
@@ -118,15 +118,15 @@ func main() {
 
     ctx := context.Background()
 
-    // Send text
-    msgID, err := sdk.SendText(ctx, accountID, toUser, "Hello!", contextToken)
+    // 发送文本
+    msgID, err := sdk.SendText(ctx, accountID, toUser, "你好！", contextToken)
     if err != nil {
         panic(err)
     }
-    fmt.Printf("Message sent: %s\n", msgID)
+    fmt.Printf("消息已发送: %s\n", msgID)
 
-    // Send image
-    imageData := []byte{/* image binary data */}
+    // 发送图片
+    imageData := []byte{/* 图片二进制数据 */}
     msgID, err = sdk.SendImage(ctx, accountID, toUser, "", imageData, contextToken)
     if err != nil {
         panic(err)
@@ -134,97 +134,97 @@ func main() {
 }
 ```
 
-## CLI Tool
+## 命令行工具
 
 ```bash
-# Build
+# 编译
 go build -o weixin-sdk ./cmd/weixin-cli
 
-# QR code login
+# 扫码登录
 ./weixin-sdk login
 
-# List accounts
+# 查看账号列表
 ./weixin-sdk list
 
-# Send message
+# 发送消息
 ./weixin-sdk send --account <id> --to <user-id> --text "Hello"
 
-# Monitor messages
+# 监控消息
 ./weixin-sdk monitor --account <id>
 
-# Delete account
+# 删除账号
 ./weixin-sdk delete --account <id>
 ```
 
-## API Reference
+## API 文档
 
-### SDK
+### SDK 核心
 
 ```go
-// Create SDK instance
+// 创建 SDK 实例
 sdk := weixinsdk.New(config *Config)
 
-// Login
+// 登录
 result, start, err := sdk.Login(ctx, accountID string, force bool)
 
-// Message monitor
+// 消息监控
 monitor, err := sdk.NewMonitor(accountID string, opts ...MonitorOption)
 
-// Send messages
+// 发送消息
 msgID, err := sdk.SendText(ctx, accountID, to, text, contextToken string)
 msgID, err := sdk.SendImage(ctx, accountID, to, caption string, imageData []byte, contextToken string)
 msgID, err := sdk.SendFile(ctx, accountID, to, caption, fileName string, fileData []byte, contextToken string)
 
-// Context management
+// 上下文管理
 token := sdk.GetContextToken(accountID, userID string)
 sdk.SetContextToken(accountID, userID, token string)
 
-// Account management
+// 账号管理
 accounts := sdk.ListAccounts()
 account, err := sdk.GetAccount(accountID string)
 err := sdk.DeleteAccount(accountID string)
 
-// Media upload/download
+// 媒体上传下载
 data, err := sdk.DownloadMedia(ctx, encryptedQueryParam, aesKeyBase64 string)
 info, err := sdk.UploadMedia(ctx, accountID, toUserID string, data []byte, mediaType api.UploadMediaType)
 ```
 
-### Monitor
+### Monitor 监控器
 
 ```go
-// Create monitor
+// 创建监控器
 monitor, err := sdk.NewMonitor(accountID,
     weixinsdk.WithHandler(handler),
     weixinsdk.WithStatusCallback(statusCb),
     weixinsdk.WithCDNBaseURL(cdnURL),
 )
 
-// Start monitoring
+// 启动监控
 err := monitor.Start(ctx)
 
-// Get status
+// 获取状态
 status := monitor.GetStatus()
 
-// Stop monitoring
+// 停止监控
 monitor.Stop()
 ```
 
-### Sender
+### Sender 发送器
 
 ```go
 sender, err := sdk.NewSender(accountID)
 
-// Send various message types
+// 发送各类消息
 msgID, err := sender.SendText(ctx, to, text, contextToken)
 msgID, err := sender.SendImage(ctx, to, caption string, imageData []byte, contextToken)
 msgID, err := sender.SendVideo(ctx, to, caption string, videoData []byte, contextToken)
 msgID, err := sender.SendFile(ctx, to, caption, fileName string, fileData []byte, contextToken)
 ```
 
-## Module Mapping
+## 模块对应关系
 
-| npm Module | Go Package |
-|------------|------------|
+| npm 模块 | Go 包 |
+|---------|------|
 | `src/api/api.ts` | `pkg/api/api.go` |
 | `src/api/types.ts` | `pkg/api/types.go` |
 | `src/auth/login-qr.ts` | `pkg/auth/login.go` |
@@ -237,20 +237,20 @@ msgID, err := sender.SendFile(ctx, to, caption, fileName string, fileData []byte
 | `src/monitor/monitor.ts` | `pkg/monitor/monitor.go` |
 | `src/storage/*.ts` | `pkg/storage/state.go` |
 
-## API Endpoints
+## API 接口
 
-All API endpoints are identical to the official npm package:
+所有 API 接口与官方 npm 包完全一致：
 
-- `getUpdates` - Long polling for new messages
-- `sendMessage` - Send messages
-- `getUploadUrl` - Get CDN upload URL
-- `getConfig` - Get account configuration
-- `sendTyping` - Send typing indicator
+- `getUpdates` - 长轮询获取新消息
+- `sendMessage` - 发送消息
+- `getUploadUrl` - 获取 CDN 上传 URL
+- `getConfig` - 获取账号配置
+- `sendTyping` - 发送输入状态
 
-## License
+## 许可证
 
 [MIT](./LICENSE)
 
-## Acknowledgments
+## 致谢
 
-This is a Go implementation of the official `@tencent-weixin/openclaw-weixin` npm package, providing the same functionality for Go developers.
+本项目是官方 `@tencent-weixin/openclaw-weixin` npm 包的 Go 语言实现，为 Go 开发者提供相同的功能支持。

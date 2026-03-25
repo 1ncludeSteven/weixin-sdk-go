@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/openclaw/weixin-sdk-go/pkg/api"
-	"github.com/openclaw/weixin-sdk-go/pkg/cdn"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/api"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/cdn"
 )
 
 // GenerateClientID generates a unique client ID for messages.

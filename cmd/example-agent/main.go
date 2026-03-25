@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	weixinsdk "github.com/openclaw/weixin-sdk-go"
-	"github.com/openclaw/weixin-sdk-go/pkg/api"
+	weixinsdk "github.com/1ncludeSteven/weixin-sdk-go"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/api"
 )
 
 // MyAgent is a simple example agent that echoes messages.

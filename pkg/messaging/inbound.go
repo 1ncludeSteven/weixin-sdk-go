@@ -5,7 +5,7 @@ package messaging
 import (
 	"strings"
 
-	"github.com/openclaw/weixin-sdk-go/pkg/api"
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/api"
 )
 
 // MsgContext represents inbound message context for the core pipeline.
