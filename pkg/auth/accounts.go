@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
+
+	"github.com/1ncludeSteven/weixin-sdk-go/pkg/config"
 )
 
 // AccountData represents stored account credentials.
@@ -258,7 +261,7 @@ func (am *AccountManager) ResolveAccount(accountID string) (*ResolvedAccount, er
 
 	baseURL := accountData.BaseURL
 	if baseURL == "" {
-		baseURL = DefaultBaseURL
+		baseURL = config.DefaultBaseURL
 	}
 
 	token := strings.TrimSpace(accountData.Token)
@@ -267,7 +270,7 @@ func (am *AccountManager) ResolveAccount(accountID string) (*ResolvedAccount, er
 	return &ResolvedAccount{
 		AccountID:  accountID,
 		BaseURL:    baseURL,
-		CDNBaseURL: DefaultCDNBaseURL,
+		CDNBaseURL: config.DefaultCDNBaseURL,
 		Token:      token,
 		Enabled:    true,
 		Configured: configured,
