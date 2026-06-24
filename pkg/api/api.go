@@ -26,13 +26,14 @@ const (
 
 // Client is the WeChat API client.
 type Client struct {
-	BaseURL     string
-	Token       string
-	HTTPClient  *http.Client
-	RouteTag    string
-	Timeout     time.Duration
+	BaseURL         string
+	Token           string
+	HTTPClient      *http.Client
+	RouteTag        string
+	Timeout         time.Duration
 	LongPollTimeout time.Duration
-	version     string
+	retryPolicy     *RetryPolicy
+	version         string
 }
 
 // ClientOption is a function that configures the Client.
@@ -80,13 +81,30 @@ func WithHTTPClient(httpClient *http.Client) ClientOption {
 	}
 }
 
+// WithRetryPolicy sets the retry policy for transient failures.
+func WithRetryPolicy(policy RetryPolicy) ClientOption {
+	return func(c *Client) {
+		p := policy
+		c.retryPolicy = &p
+	}
+}
+
+// WithRetryDisabled disables automatic retries.
+func WithRetryDisabled() ClientOption {
+	return func(c *Client) {
+		c.retryPolicy = nil
+	}
+}
+
 // NewClient creates a new WeChat API client.
 func NewClient(opts ...ClientOption) *Client {
+	defaultRetry := DefaultRetryPolicy()
 	c := &Client{
 		BaseURL:         DefaultBaseURL,
 		HTTPClient:      &http.Client{Timeout: 60 * time.Second, Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: false}}},
 		Timeout:         DefaultAPITimeout,
 		LongPollTimeout: DefaultLongPollTimeout,
+		retryPolicy:     &defaultRetry,
 		version:         "2.0.1",
 	}
 
@@ -194,6 +212,15 @@ func (c *Client) doRequest(ctx context.Context, endpoint string, reqBody interfa
 	return respBody, nil
 }
 
+// doReq executes a request, applying retry if policy is configured.
+// Non-idempotent requests like GetUpdates skip retry via skipRetry flag.
+func (c *Client) doReq(ctx context.Context, endpoint string, reqBody interface{}, timeout time.Duration) ([]byte, error) {
+	if c.retryPolicy != nil {
+		return c.doRequestWithRetry(ctx, endpoint, reqBody, timeout, *c.retryPolicy)
+	}
+	return c.doRequest(ctx, endpoint, reqBody, timeout)
+}
+
 // GetUpdates performs a long-poll request to get new messages.
 func (c *Client) GetUpdates(ctx context.Context, getUpdatesBuf string) (*GetUpdatesResp, error) {
 	req := &GetUpdatesReq{
@@ -226,14 +253,14 @@ func (c *Client) SendMessage(ctx context.Context, msg *WeixinMessage) error {
 		req.Msg.MessageState = int(MessageStateFinish)
 	}
 
-	_, err := c.doRequest(ctx, "ilink/bot/sendmessage", req, c.Timeout)
+	_, err := c.doReq(ctx, "ilink/bot/sendmessage", req, c.Timeout)
 	return err
 }
 
 // GetUploadURL gets CDN upload pre-signed parameters.
 func (c *Client) GetUploadURL(ctx context.Context, req *GetUploadUrlReq) (*GetUploadUrlResp, error) {
 	req.BaseInfo = c.buildBaseInfo()
-	respBody, err := c.doRequest(ctx, "ilink/bot/getuploadurl", req, c.Timeout)
+	respBody, err := c.doReq(ctx, "ilink/bot/getuploadurl", req, c.Timeout)
 	if err != nil {
 		return nil, err
 	}
@@ -254,7 +281,7 @@ func (c *Client) GetConfig(ctx context.Context, ilinkUserID, contextToken string
 		BaseInfo:     c.buildBaseInfo(),
 	}
 
-	respBody, err := c.doRequest(ctx, "ilink/bot/getconfig", req, DefaultConfigTimeout)
+	respBody, err := c.doReq(ctx, "ilink/bot/getconfig", req, DefaultConfigTimeout)
 	if err != nil {
 		return nil, err
 	}
@@ -275,7 +302,7 @@ func (c *Client) SendTyping(ctx context.Context, ilinkUserID, typingTicket strin
 		Status:       int(status),
 	}
 
-	_, err := c.doRequest(ctx, "ilink/bot/sendtyping", req, DefaultConfigTimeout)
+	_, err := c.doReq(ctx, "ilink/bot/sendtyping", req, DefaultConfigTimeout)
 	return err
 }
 
