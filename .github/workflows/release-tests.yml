@@ -1,0 +1,23 @@
+name: Release Tests
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  checks: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Release Tests
+        uses: aws-actions/devops-agent-qa@v1
+        with:
+          webhook-url: ${{ secrets.DEVOPS_AGENT_WEBHOOK_URL }}
+          webhook-secret: ${{ secrets.DEVOPS_AGENT_WEBHOOK_SECRET }}
+          test-profile-id: ${{ vars.TEST_PROFILE_ID }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
