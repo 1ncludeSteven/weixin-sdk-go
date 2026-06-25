@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"strings"
 
 	"github.com/1ncludeSteven/weixin-sdk-go/pkg/api"
 	"github.com/1ncludeSteven/weixin-sdk-go/pkg/auth"
@@ -176,7 +175,7 @@ func (s *SDK) NewMonitor(accountID string, opts ...MonitorOption) (*Monitor, err
 
 // StartMonitor starts monitoring messages for an account.
 func (s *SDK) StartMonitor(ctx context.Context, accountID string, handler MessageHandler) (*Monitor, error) {
-	m, err := s.NewMonitor(accountID, WithHandler(handler))
+	m, err := s.NewMonitor(accountID, monitor.WithHandler(handler))
 	if err != nil {
 		return nil, err
 	}
@@ -318,7 +317,7 @@ func (s *SDK) DeleteAccount(accountID string) error {
 
 	// Remove allowFrom store
 	allowStore := storage.NewAllowFromStore(accountID)
-	osRemove(allowStore.(*struct{ path string }).path)
+	osRemove(allowStore.FilePath())
 
 	return s.accountManager.DeleteAccount(accountID)
 }
