@@ -234,6 +234,11 @@ type AllowFromFileContent struct {
 	AllowFrom []string `json:"allowFrom"`
 }
 
+// FilePath returns the path to the allowFrom file.
+func (s *AllowFromStore) FilePath() string {
+	return s.path
+}
+
 // NewAllowFromStore creates a new allowFrom store.
 func NewAllowFromStore(accountID string) *AllowFromStore {
 	home, _ := os.UserHomeDir()

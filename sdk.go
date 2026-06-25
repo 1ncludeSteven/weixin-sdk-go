@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"strings"
 
 	"github.com/1ncludeSteven/weixin-sdk-go/pkg/api"
 	"github.com/1ncludeSteven/weixin-sdk-go/pkg/auth"
@@ -176,7 +175,7 @@ func (s *SDK) NewMonitor(accountID string, opts ...MonitorOption) (*Monitor, err
 
 // StartMonitor starts monitoring messages for an account.
 func (s *SDK) StartMonitor(ctx context.Context, accountID string, handler MessageHandler) (*Monitor, error) {
-	m, err := s.NewMonitor(accountID, WithHandler(handler))
+	m, err := s.NewMonitor(accountID, monitor.WithHandler(handler))
 	if err != nil {
 		return nil, err
 	}
@@ -235,6 +234,11 @@ func (s *Sender) SendFile(ctx context.Context, to, caption, fileName string, fil
 	return messaging.NewSender(s.client, s.cdnBaseURL).SendFile(ctx, to, caption, fileName, fileData, contextToken)
 }
 
+// SendVoice sends a voice message.
+func (s *Sender) SendVoice(ctx context.Context, to string, voiceData []byte, duration int, contextToken string) (string, error) {
+	return messaging.NewSender(s.client, s.cdnBaseURL).SendVoice(ctx, to, voiceData, duration, contextToken)
+}
+
 // SendMedia sends a media file (auto-detect type by MIME).
 func (s *Sender) SendMedia(ctx context.Context, to, caption, filePath string, contextToken string) (string, error) {
 	// Read file
@@ -285,6 +289,24 @@ func (s *SDK) SendFile(ctx context.Context, accountID, to, caption, fileName str
 	return sender.SendFile(ctx, to, caption, fileName, fileData, contextToken)
 }
 
+// SendVoice sends a voice message (convenience method).
+func (s *SDK) SendVoice(ctx context.Context, accountID, to string, voiceData []byte, duration int, contextToken string) (string, error) {
+	sender, err := s.NewSender(accountID)
+	if err != nil {
+		return "", err
+	}
+	return sender.SendVoice(ctx, to, voiceData, duration, contextToken)
+}
+
+// SendVideo sends a video message (convenience method).
+func (s *SDK) SendVideo(ctx context.Context, accountID, to, caption string, videoData []byte, contextToken string) (string, error) {
+	sender, err := s.NewSender(accountID)
+	if err != nil {
+		return "", err
+	}
+	return sender.SendVideo(ctx, to, caption, videoData, contextToken)
+}
+
 // ============================================================================
 // Account Management
 // ============================================================================
@@ -318,7 +340,7 @@ func (s *SDK) DeleteAccount(accountID string) error {
 
 	// Remove allowFrom store
 	allowStore := storage.NewAllowFromStore(accountID)
-	osRemove(allowStore.(*struct{ path string }).path)
+	osRemove(allowStore.FilePath())
 
 	return s.accountManager.DeleteAccount(accountID)
 }
