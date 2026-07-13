@@ -167,16 +167,16 @@ func (c *Client) doRequest(ctx context.Context, endpoint string, reqBody interfa
 		req.Header.Set(k, v)
 	}
 
-	// Create a client with the specific timeout
-	client := c.HTTPClient
+	// Use a request-specific context with timeout if needed
+	reqCtx := ctx
+	var cancel context.CancelFunc
 	if timeout > 0 {
-		client = &http.Client{
-			Timeout:   timeout,
-			Transport: c.HTTPClient.Transport,
-		}
+		reqCtx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
 	}
+	req = req.WithContext(reqCtx)
 
-	resp, err := client.Do(req)
+	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
@@ -221,8 +221,10 @@ func (c *Client) GetUpdates(ctx context.Context, getUpdatesBuf string) (*GetUpda
 // SendMessage sends a message to a user.
 func (c *Client) SendMessage(ctx context.Context, msg *WeixinMessage) error {
 	req := &SendMessageReq{Msg: msg}
-	if req.Msg != nil {
+	if req.Msg != nil && req.Msg.MessageType == int(MessageTypeNone) {
 		req.Msg.MessageType = int(MessageTypeBot)
+	}
+	if req.Msg != nil && req.Msg.MessageState == int(MessageStateNew) {
 		req.Msg.MessageState = int(MessageStateFinish)
 	}
 
@@ -329,13 +331,7 @@ func (c *Client) PollQRStatus(ctx context.Context, qrcode string) (*StatusRespon
 		httpReq.Header.Set("SKRouteTag", c.RouteTag)
 	}
 
-	// Use long-poll timeout for this request
-	client := &http.Client{
-		Timeout:   35 * time.Second,
-		Transport: c.HTTPClient.Transport,
-	}
-
-	resp, err := client.Do(httpReq)
+	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}

@@ -6,7 +6,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/hex"
-	"fmt"
+	"os"
 
 	"github.com/1ncludeSteven/weixin-sdk-go/pkg/api"
 	"github.com/1ncludeSteven/weixin-sdk-go/pkg/auth"
@@ -502,12 +502,8 @@ func NormalizeAccountID(rawID string) string {
 	return auth.NormalizeAccountID(rawID)
 }
 
-// readFile reads a file (placeholder for os.ReadFile).
-var readFile = func(path string) ([]byte, error) {
-	return nil, fmt.Errorf("not implemented")
-}
+// readFile reads a file from disk.
+var readFile = os.ReadFile
 
-// osRemove removes a file (placeholder for os.Remove).
-var osRemove = func(path string) error {
-	return nil
-}
+// osRemove removes a file from disk.
+var osRemove = os.Remove

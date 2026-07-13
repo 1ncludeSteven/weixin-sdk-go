@@ -293,9 +293,7 @@ func (m *Monitor) updateStatus(fn func(*Status)) {
 }
 
 // updateStatusLocked updates the status with a function (must hold lock).
+// Does NOT invoke statusCallback to avoid deadlock when called from locked contexts.
 func (m *Monitor) updateStatusLocked(fn func(*Status)) {
 	fn(m.status)
-	if m.statusCallback != nil {
-		m.statusCallback(m.status)
-	}
 }
