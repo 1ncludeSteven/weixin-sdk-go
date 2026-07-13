@@ -147,9 +147,17 @@ func (s *ContextTokenStore) Clear(accountID string) {
 
 // FindAccountIDsByContextToken finds account IDs that have a context token for a user.
 func FindAccountIDsByContextToken(accountIDs []string, userID string) []string {
-	// This would require loading all context token stores
-	// For simplicity, return empty for now
-	return []string{}
+	var result []string
+	for _, accountID := range accountIDs {
+		store := NewContextTokenStore(accountID)
+		if err := store.Load(); err != nil {
+			continue
+		}
+		if token := store.Get(accountID, userID); token != "" {
+			result = append(result, accountID)
+		}
+	}
+	return result
 }
 
 // DebugModeState represents debug mode state.

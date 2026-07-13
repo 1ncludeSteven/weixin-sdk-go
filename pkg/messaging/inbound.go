@@ -132,14 +132,12 @@ func GetMediaInfo(item *api.MessageItem) *MediaInfo {
 // MessageToContext converts a WeixinMessage to MsgContext.
 func MessageToContext(msg *api.WeixinMessage, accountID string, mediaPath, mediaType string) *MsgContext {
 	fromUserID := msg.FromUserID
-	if fromUserID == "" {
-		fromUserID = ""
-	}
+	toUserID := msg.ToUserID
 
 	return &MsgContext{
 		Body:               ExtractTextBody(msg.ItemList),
 		From:               fromUserID,
-		To:                 fromUserID,
+		To:                 toUserID,
 		AccountID:          accountID,
 		OriginatingChannel: "openclaw-weixin",
 		OriginatingTo:      fromUserID,

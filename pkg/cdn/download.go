@@ -71,12 +71,16 @@ func (d *Downloader) download(ctx context.Context, encryptedQueryParam string) (
 	}
 	defer resp.Body.Close()
 
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("CDN download read failed: %w", err)
+	}
+
 	if !isSuccess(resp.StatusCode) {
-		body, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("CDN download %s: %s", resp.Status, string(body))
 	}
 
-	return io.ReadAll(resp.Body)
+	return body, nil
 }
 
 // isSuccess checks if HTTP status is successful.

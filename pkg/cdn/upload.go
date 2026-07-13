@@ -152,12 +152,21 @@ func (u *Uploader) uploadToCDN(ctx context.Context, uploadParam, fileKey string,
 			}
 			return "", lastErr
 		}
-		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			lastErr = err
+			if attempt < UploadMaxRetries {
+				time.Sleep(time.Duration(attempt) * time.Second)
+				continue
+			}
+			return "", lastErr
+		}
 
 		if resp.StatusCode >= 400 && resp.StatusCode < 500 {
 			errMsg := resp.Header.Get("x-error-message")
 			if errMsg == "" {
-				body, _ := io.ReadAll(resp.Body)
 				errMsg = string(body)
 			}
 			return "", fmt.Errorf("CDN client error %d: %s", resp.StatusCode, errMsg)
